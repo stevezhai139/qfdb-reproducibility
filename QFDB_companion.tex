@@ -1,0 +1,132 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\ket}[1]{\lvert #1 \rangle}
+\newcommand{\bra}[1]{\langle #1 \rvert}
+\theoremstyle{definition}
+\newtheorem{qprop}{Proposition}
+\newtheorem{qlem}{Lemma}
+\title{Database Schemas as Quantum Fields:\\ Companion Report --- Proofs, Instruments, and Pre-registered Experiments}
+\author{Arun Reungsilpkolkarn\\ Department of Computer Science, Bangkok University\\ \texttt{arun.r@bu.ac.th}}
+\date{July 2026 \\[2pt] \small Code and data: \url{https://github.com/stevezhai139/qfdb-reproducibility}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report accompanies the paper \emph{Database Schemas as Quantum Fields: Relational and Document Models as a Classical Sector}. It contains the proofs of the paper's propositions, the full algebra of the worked temporal example (Faces A and B), the complementarity reading, the complete S1 elicitation design with power analysis, the pre-registered stored-data negative control with full results, and the LLM-respondent pilot harness. Every number is reproduced by the companion code.
+\end{abstract}
+
+\section{Proofs}
+
+\subsection{Proposition 1 (Structure vs.\ state)}
+Write an entity state as $\rho = D + C$ in the structure basis $\{\ket{s_k}\}$, with $D=\sum_k p_k\ket{s_k}\bra{s_k}$ and $C=\rho-D$.
+
+\paragraph{(a) The sector $\{C=0\}$ is closed under structure change.}
+A definite structure is a basis vector $\ket{s_k}\bra{s_k}$; a heterogeneous or merely uncertain one is a mixture $\sum_k p_k \ket{s_k}\bra{s_k}$. Both are diagonal, so $C=0$. Schema evolution acts as a stochastic matrix $M$ on the population vector $p$ ($p\mapsto Mp$, $M_{jk}\ge0$, $\sum_j M_{jk}=1$): it maps diagonal states to diagonal states and leaves $C$ untouched. Hence no sequence of structure changes creates coherence. \qed
+
+\paragraph{(b) Which signature is carried by what.}
+For a query outcome $\ket{e}$ the Born rule expands as
+\[
+P(e)=\sum_k p_k\,\lvert\langle e|s_k\rangle\rvert^2 \;+\; 2\,\mathrm{Re}\!\!\sum_{k<l} C_{kl}\,\langle e|s_k\rangle\langle s_l|e\rangle .
+\]
+The second (interference) term is linear in $C$ and vanishes iff $C=0$: the S3 signature is carried by coherence alone. Every separable $\rho$ admits a local-hidden-variable model for the CHSH settings and therefore obeys $\lvert S\rvert\le2$ (Section~\ref{sec:chsh}): the S1 signature is carried by non-separability alone.
+
+Order effects, by contrast, are a property of the \emph{query pair}, not of $C$:
+
+\begin{qlem}[Commuting queries are order-invariant on every state]\label{lem:comm}
+Let $\{P_a\}$ and $\{Q_b\}$ be projective measurements with $[P_a,Q_b]=0$ for all $a,b$. Then for every state $\rho$ the marginal of either measurement is unchanged by performing the other first.
+\end{qlem}
+\begin{proof}
+$\Pr(b \text{ after } P) = \sum_a \operatorname{tr}\!\big(Q_b P_a \rho P_a\big)
+= \sum_a \operatorname{tr}\!\big(P_a Q_b P_a \rho\big)
+= \sum_a \operatorname{tr}\!\big(Q_b P_a \rho\big)
+= \operatorname{tr}(Q_b\rho)$,
+using cyclicity and $P_aQ_bP_a = Q_bP_a^2 = Q_bP_a$. The symmetric statement holds with the roles exchanged.
+\end{proof}
+
+Conversely, an order effect requires non-commuting queries, and it can occur on a \emph{coherence-free} state: Face~A of the paper realises exactly this. Take $\rho=\ket{0}\bra{0}$ (a stored, definite record; $C=0$ in the stored basis) and a second query $Q_\theta$ projecting at angle $\theta$ to the stored axis. Then
+\[
+p_{AB}(0,\theta)=\cos^2\theta
+\qquad\text{but}\qquad
+p_{BA}(0,\theta)=\cos^4\theta ,
+\]
+which differ for $0<\theta<\tfrac\pi2$. The first measurement creates the coherence (relative to the stored basis) that the second one feels. This is why the paper assigns order effects to the \emph{commuting} condition of the classical sector (Definition~2), and interference and Bell violations to the state's $C$ and non-separability respectively --- one signature per sector condition. \qed
+
+\subsection{Proposition 2 (Data-model embedding)}
+Build $\mathcal H$ by recursion: an atomic field over domain $D$ is a single mode $\mathbb C^{D\cup\{\bot\}}$; an ordered array of element type $\tau$ is the sequence space $\bigoplus_k \mathcal H_\tau^{\otimes k}$, and a set/multiset is its symmetric subspace; a nested document is the tensor product of its sub-fields.
+
+\begin{proof}
+Each record vector $\ket t = \bigotimes_f \ket{t_f}$ is by construction a \emph{product vector} across the field factors ($\bot$-padding for heterogeneous collections keeps this true for document data). A relation or collection $r$ is the state
+$\rho_r = \tfrac1{|r|}\sum_{t\in r}\ket t\bra t$,
+a convex combination of product states --- \textbf{separable by the definition of separability}; no positive-partial-transpose or negativity criterion is invoked, so the bound-entanglement counterexamples to ``PPT $\Rightarrow$ separable'' (which exist from dimension $2\times4$ and $3\times3$ up) are irrelevant to the argument. $\rho_r$ is also diagonal in the record basis, so $C=0$, and selection/membership projectors $\{\ket t\bra t\}$ commute. By Proposition~1 the state lies in the classical sector. Nothing in the argument depends on whether a field factor is a single mode (Codd's 1NF) or an enriched sequence/nesting space, so the relational and document models occupy one and the same diagonal, separable sector. \emph{Remark:} in the paper's $2\times2$ example $\{(a,x),(b,y)\}$, quoting ``negativity $0$'' \emph{is} conclusive, because PPT $\Leftrightarrow$ separable holds in dimensions $2\times2$ and $2\times3$ (Horodecki); the caveat above applies only to higher dimensions.
+\end{proof}
+
+\subsection{Proposition 3 (Temporal order-invariance)}
+\begin{qprop}[restated]
+A set of temporal queries over an entity's history is order-invariant --- its outcomes admit a single classical joint distribution, every marginal independent of query order --- iff the histories' decoherence functional obeys $\mathrm{Re}\,D(\alpha,\beta)=0$ for $\alpha\neq\beta$. Logging every intermediate stage the queries distinguish is sufficient; it is necessary exactly when the unlogged alternatives carry coherence.
+\end{qprop}
+\begin{proof}
+The equivalence between the existence of a single classical joint distribution (hence order-independent marginals) and the weak consistency condition $\mathrm{Re}\,D(\alpha,\beta)=0$ is the standard consistency theorem of the consistent-histories formalism (Griffiths). For the second clause: a logged intermediate stage inserts a projective measurement at that stage, which dephases the history alternatives and forces $\mathrm{Re}\,D(\alpha,\beta)=0$ --- sufficiency. Necessity fails in general: a state already diagonal on the alternatives (a classical-sector state, Definition~2 of the paper) satisfies the condition with no logging at all --- which is precisely why an ordinary unlogged classical database is order-safe. For states carrying coherence between the alternatives, a generic relative phase gives $\mathrm{Re}\,D(\alpha,\beta)\neq0$, and logging is then exactly what restores order-safety. Hence: \emph{once histories carry coherence}, logging granularity is the order-safety boundary.
+\end{proof}
+
+\subsection{Characterization of the sector: one-way guarantees}
+The paper deliberately states the characterization as one-way guarantees. Two remarks make precise why the naive ``iff'' would be false. (i)~$\lvert S\rvert\le2$ does not imply separability: Werner states in $2\times2$ are entangled yet satisfy the CHSH bound for all measurement settings (and in a visibility range even admit a full local-hidden-variable model). $S>2$ \emph{certifies} non-separability; $S\le2$ certifies nothing. (ii)~For a fixed state, order-invariance of the realised queries does not imply the query algebra commutes. The correct statement quantifies over states (Lemma~\ref{lem:comm}): a commuting family is order-invariant on \emph{every} state, and any observed signature beyond its classical bound certifies that the (state, queries, histories) triple has left the sector.
+
+\subsection{CHSH: the two-line classical bound and both ends}\label{sec:chsh}
+If each item carries predetermined $\pm1$ answers $a,a',b,b'$ under both settings of each side, then
+$a(b+b') + a'(b-b')$ has $b\pm b'\in\{0,\pm2\}$, one of the two brackets vanishing, so the expression is $\pm2$ and $\lvert S\rvert = \lvert\mathbb E[\,\cdot\,]\rvert \le 2$. Mixtures (noisy or contextual shared-latent strategies) are convex combinations and inherit the bound. The companion script \texttt{qfdb\_commoncause\_bound.py} enumerates all $16$ deterministic common-cause strategies (all lie in $[-2,2]$), samples $2\times10^5$ random mixtures (max $\lvert S\rvert=1.4514$), and evaluates the Bell state with CHSH-optimal settings ($S=2\sqrt2\approx2.8284$).
+
+\section{Worked example: full algebra}
+Lifecycle: \emph{calf} $\to$ \emph{steer} $\to$ \emph{ox} (one male animal; the paper's running example).
+
+\paragraph{Face A (order effect on a stored record).}
+State $\ket{\lnot\text{vacc}}$ stored at plane $t$; mutant-susceptibility query $=$ projector at angle $\theta$. Asked alone: $\Pr(\lnot\text{vacc})=1.000$. Asked after the mutant query: $\Pr = \cos^4\tfrac\theta2 + \sin^4\tfrac\theta2$ in Bloch convention, giving $1.000,\,0.875,\,0.750,\,0.625,\,0.500$ at $\theta = 0^\circ,30^\circ,45^\circ,60^\circ,90^\circ$ --- an order effect up to $0.500$, while the Wang--Busemeyer QQ invariant is $0.000$ at every $\theta$ (\texttt{qfdb\_order\_effect\_mutant.py}).
+
+A classical disturbance model tuned to the same order effect --- B-first fully redraws A ($50/50$), B $\sim$ Bernoulli$(r)$ --- gives
+\[
+\mathrm{QQ} = \big[p(A_yB_y)+p(A_nB_n)\big] - \big[p(B_yA_y)+p(B_nA_n)\big]
+= r - \tfrac12 ,
+\]
+i.e.\ $\mathrm{QQ}=0.10,0.20,0.30$ at prevalence $r=0.6,0.7,0.8$: zero only at one fine-tuned base rate, whereas the quantum value is parameter-free. Pinning that residual is what S1 targets.
+
+\paragraph{Face B (unlogged history).}
+Histories $\{$through-steer, not-through-steer$\}$ with amplitudes $a,b$ and relative phase $\varphi$. Unlogged: $\Pr(\text{ox now}) = \lvert a + b e^{i\varphi}\rvert^2$ ranges over $[(\lvert a\rvert-\lvert b\rvert)^2,\,(\lvert a\rvert+\lvert b\rvert)^2]$; the observed swing $[0.000, 0.444]$ forces $\lvert a\rvert=\lvert b\rvert$ with $4\lvert a\rvert^2 = 0.444$, i.e.\ $\lvert a\rvert^2 = 1/9$. Logged: the decoherence functional is dephased, $\Pr = \lvert a\rvert^2 + \lvert b\rvert^2 = 2/9 = 0.222$, phase-blind. The decoherence functional's off-diagonal magnitude is $0.111$ unlogged and $0.000$ logged (\texttt{qfdb\_consistent\_histories.py}).
+
+\paragraph{Complementarity (supporting check).}
+With visibility $V$ and which-structure distinguishability $D$, $V^2 + D^2 \le 1$ (Englert). Reading records as a which-structure detector: pinning records ($D\to1$) sharpens the schema; leaving them indefinite keeps it field-like --- a quantum form of schema-on-write vs.\ schema-on-read. The inequality holds for any two-outcome system, classical bits included, so it is a coherence check of the framework, not a non-classicality test.
+
+\section{S1 elicitation design (full)}
+Parties $=$ two category systems describing the same products. Settings: $A=\{$Electronics, Furniture$\}$, $A'=\{$Gift, Tool$\}$; $B=\{$Gadget, Decor$\}$, $B'=\{$Toy, Hardware$\}$. One respondent sees \emph{one} item and \emph{one} setting pair (between-subjects, randomised --- the free-choice condition), makes a forced-choice category judgment on each side, coded $\pm1$. Acceptance criterion: violation iff the $95\%$ bootstrap CI on $S$ lies above $2$ \emph{and} the no-signaling (marginal-law) check passes; marginal shifts with the distant setting read as contextuality-with-signaling, not a Bell violation. A violation certifies non-classical structure in correspondence \emph{judgments} (not in the stored schema-field --- the Level-2 distinction). Power: for an effect near the Aerts--Sozzo magnitude ($S=2.42$, $N=81$), on the order of $10^2$ respondents per setting pair; a pre-registered interim look allows early stopping. The Aerts--Sozzo line has been criticised for marginal-selectivity violations (Dzhafarov--Kujala); the no-signaling gate above is the design answer. Instrument, tally and no-signaling scripts: \texttt{s1\_elicitation/}.
+
+\section{Pre-registered stored-data negative control}
+Pre-registration frozen before evaluation (\texttt{s1\_stored/PREREGISTRATION.md}, sha256 prefix \texttt{72cf065266be0124}). Prediction: stored two-store correlations are common-cause, hence $S\le2$ everywhere, adversarial settings included; for per-side-deterministic responses this is a theorem (the shared item is the latent variable of Section~\ref{sec:chsh}), so the run validates the instrument end-to-end and measures the margin.
+
+\textbf{Data.} Magellan/ditto entity-matching benchmarks; items $=$ ground-truth matched pairs; rule library (numeric-median, length, top-8 token rules) built on TRAIN per side; evaluation on held-out VALID$\cup$TEST. Locality by construction: each side's $\pm1$ response is a function of that side's record and setting only. \textbf{Analyses.} (A) natural settings, same items; (B) adversarial: exhaustive search over setting pairs maximising $\lvert S\rvert$ on TRAIN, evaluated once held-out; (C) between-subjects dry run (four disjoint item groups) with no-signaling deltas. \textbf{Self-tests} (pass before data): Bell $2.8284$; engineered classical correlations attain $S=2.000$ exactly (the instrument is sharp at the bound); product state $\approx 0$.
+
+\begin{table}[h]\centering\small
+\caption{Held-out results (bootstrap $95\%$ CIs, $10^4$ resamples). No CI lies above $2$: the classical-sector prediction is verified on every analysable pair, while the same pipeline's entangled control reaches $2.8284$.}
+\begin{tabular}{lrrrrcc}
+\toprule
+dataset & $n$ & $S_{\text{nat}}$ & $S_{\text{adv}}^{\text{train}}$ & $S_{\text{adv}}^{\text{held-out}}$ & $95\%$ CI & NS $\Delta$\\
+\midrule
+Amazon--Google & 468 & $+1.026$ & $+1.966$ & $+1.974$ & $[+1.940,+2.000]$ & $0.154$\\
+DBLP--ACM & 888 & $-0.189$ & $+2.000$ & $+1.995$ & $[+1.986,+2.000]$ & $0.189$\\
+DBLP--GoogleScholar & 2140 & $-0.456$ & $+1.988$ & $+1.983$ & $[+1.972,+1.993]$ & $0.037$\\
+Fodors--Zagats & 44 & $-0.364$ & $+2.000$ & $+2.000$ & $[+2.000,+2.000]$ & $0.364$\\
+Walmart--Amazon & 386 & $-0.166$ & $+1.979$ & $+1.938$ & $[+1.886,+1.979]$ & $0.103$\\
+iTunes--Amazon & 54 & $+0.815$ & $+2.000$ & $+2.000$ & $[+2.000,+2.000]$ & $0.319$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Beer ($\approx20$ held-out matches) is excluded by a $\ge30$-item practicality rule adopted at analysis time and disclosed here (it was not part of the frozen pre-registration); all other pairs are reported without selection. The between-subjects no-signaling deltas scale with per-group $n$ --- the direct lesson for the human study's sample size. Adversarial search saturates the deterministic bound on strongly-correlated pairs (exactly $2.000$) and crowds it elsewhere ($1.94$--$1.99$): real integration data pushes against the classical ceiling but cannot pass it, exactly as the embedding requires. Reproduce with \texttt{s1\_stored/s1\_stored\_negative\_control.py} (fetch commands in the pre-registration).
+
+\section{LLM-respondent pilot harness}
+\texttt{s1\_elicitation/llm\_harness/} implements the S1 protocol with a language model as synthetic respondent: one API call $=$ one respondent (fresh context; between-subjects), one setting pair per call, neutral catalogue-filing wording (no physics vocabulary), option order counterbalanced, temperature $>0$ with a reported grid, open-weights model preferred and version pinned, full JSONL logs, and the same acceptance criterion (CI $>2$ \emph{and} no-signaling). A violation would certify non-classical structure in the \emph{model's} judgment statistics --- not in human cognition and not in the schema-field; the pilot's roles are instrument validation and an effect-size prior for the human study. A \texttt{--dry-run} classical simulated judge exercises the analysis path without any API.
+
+\section{Reproducibility}
+All scripts are NumPy-only (the LLM harness is stdlib-only). \texttt{qfdb\_signatures\_verify.py}, \texttt{qfdb\_order\_effect\_mutant.py}, \texttt{qfdb\_consistent\_histories.py}, \texttt{qfdb\_defs\_verify.py}, \texttt{qfdb\_commoncause\_bound.py}, \texttt{qfdb\_H1\_field\_modes.py} reproduce every computed number in the main paper; \texttt{s2\_calibration/} reproduces the 72-survey calibration (order-effect mean $0.087$, range $0.03$--$0.58$; QQ mean $+0.001\pm0.036$, $t(71)=0.25$, $p=0.80$); \texttt{s1\_stored/} reproduces the table above.
+
+\end{document}

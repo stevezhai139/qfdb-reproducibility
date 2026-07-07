@@ -1,0 +1,224 @@
+{
+ "prediction": "S <= 2 on all stored-data pairs",
+ "positive_control_bell": 2.8284271247461894,
+ "n_datasets": 6,
+ "n_violations_CIabove2": 0,
+ "results": [
+  {
+   "dataset": "Amazon-Google",
+   "n_train": 699,
+   "n_heldout": 468,
+   "natural": {
+    "S": 1.0256410256410258,
+    "ci": [
+     0.8632478632478633,
+     1.1794871794871795
+    ],
+    "settings": [
+     "num:price>49.99",
+     "tok:adobe",
+     "num:price>44.99",
+     "tok:software"
+    ]
+   },
+   "adversarial": {
+    "S_train": 1.965665236051502,
+    "S_heldout": 1.9743589743589745,
+    "ci": [
+     1.9401709401709404,
+     2.0
+    ],
+    "settings": [
+     "tok:adobe",
+     "tok:home",
+     "tok:punch",
+     "tok:adobe"
+    ]
+   },
+   "between_subjects": {
+    "S": 1.9145299145299144,
+    "max_nosignaling_delta": 0.15384615384615385
+   }
+  },
+  {
+   "dataset": "DBLP-ACM",
+   "n_train": 1332,
+   "n_heldout": 888,
+   "natural": {
+    "S": -0.18918918918918926,
+    "ci": [
+     -0.3153153153153153,
+     -0.05855855855855863
+    ],
+    "settings": [
+     "num:year>1998",
+     "tok:data",
+     "num:year>1998",
+     "tok:data"
+    ]
+   },
+   "adversarial": {
+    "S_train": 2.0,
+    "S_heldout": 1.9954954954954955,
+    "ci": [
+     1.9864864864864864,
+     2.0
+    ],
+    "settings": [
+     "tok:database",
+     "num:year>1998",
+     "num:year>1998",
+     "tok:database"
+    ]
+   },
+   "between_subjects": {
+    "S": 2.09009009009009,
+    "max_nosignaling_delta": 0.18918918918918917
+   }
+  },
+  {
+   "dataset": "DBLP-GoogleScholar",
+   "n_train": 3207,
+   "n_heldout": 2140,
+   "natural": {
+    "S": -0.4560747663551402,
+    "ci": [
+     -0.5383177570093458,
+     -0.3738317757009345
+    ],
+    "settings": [
+     "num:year>1998",
+     "tok:data",
+     "num:year>1999",
+     "tok:data"
+    ]
+   },
+   "adversarial": {
+    "S_train": 1.9875272840661053,
+    "S_heldout": 1.9831775700934577,
+    "ci": [
+     1.9719626168224296,
+     1.9925233644859817
+    ],
+    "settings": [
+     "tok:mining",
+     "tok:queries",
+     "tok:queries",
+     "tok:mining"
+    ]
+   },
+   "between_subjects": {
+    "S": 1.94392523364486,
+    "max_nosignaling_delta": 0.03738317757009346
+   }
+  },
+  {
+   "dataset": "Fodors-Zagats",
+   "n_train": 66,
+   "n_heldout": 44,
+   "natural": {
+    "S": -0.36363636363636376,
+    "ci": [
+     -0.9090909090909092,
+     0.18181818181818166
+    ],
+    "settings": [
+     "num:class>49.5",
+     "tok:cafe",
+     "num:class>49.5",
+     "tok:cafe"
+    ]
+   },
+   "adversarial": {
+    "S_train": 2.0000000000000004,
+    "S_heldout": 2.0,
+    "ci": [
+     1.9999999999999998,
+     2.0
+    ],
+    "settings": [
+     "tok:cafe",
+     "tok:room",
+     "tok:room",
+     "tok:cafe"
+    ]
+   },
+   "between_subjects": {
+    "S": 2.3636363636363638,
+    "max_nosignaling_delta": 0.36363636363636365
+   }
+  },
+  {
+   "dataset": "Walmart-Amazon",
+   "n_train": 576,
+   "n_heldout": 386,
+   "natural": {
+    "S": -0.16580310880829008,
+    "ci": [
+     -0.37305699481865273,
+     0.031088082901554515
+    ],
+    "settings": [
+     "num:modelno>5.561e+04",
+     "tok:black",
+     "num:price>32",
+     "tok:black"
+    ]
+   },
+   "adversarial": {
+    "S_train": 1.9791666666666665,
+    "S_heldout": 1.9378238341968912,
+    "ci": [
+     1.8860103626943003,
+     1.9792746113989639
+    ],
+    "settings": [
+     "tok:digital",
+     "tok:wireless",
+     "tok:wireless",
+     "tok:digital"
+    ]
+   },
+   "between_subjects": {
+    "S": 1.836125429553265,
+    "max_nosignaling_delta": 0.1030927835051546
+   }
+  },
+  {
+   "dataset": "iTunes-Amazon",
+   "n_train": 78,
+   "n_heldout": 54,
+   "natural": {
+    "S": 0.8148148148148148,
+    "ci": [
+     0.2962962962962963,
+     1.2592592592592595
+    ],
+    "settings": [
+     "len:Song_Name>20",
+     "tok:feat",
+     "len:Song_Name>22",
+     "tok:feat"
+    ]
+   },
+   "adversarial": {
+    "S_train": 2.0000000000000004,
+    "S_heldout": 2.0,
+    "ci": [
+     1.9999999999999998,
+     2.0
+    ],
+    "settings": [
+     "tok:love",
+     "tok:feat",
+     "tok:feat",
+     "tok:love"
+    ]
+   },
+   "between_subjects": {
+    "S": 2.32967032967033,
+    "max_nosignaling_delta": 0.31868131868131866
+   }
+  }
+ ]
+}
