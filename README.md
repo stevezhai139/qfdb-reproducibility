@@ -99,3 +99,10 @@ Released under the MIT License (code). See `LICENSE`.
   note   = {School of Information Technology and Innovation, Bangkok University}
 }
 ```
+
+## Reference environments
+Every number reproduces digit-for-digit (incl. bootstrap CIs; fixed PCG64 seed) on:
+- MacBook Pro, Apple M4, 24 GB RAM, 512 GB internal SSD + 1 TB Thunderbolt external SSD, macOS Tahoe 26.x, NumPy 2.2.6
+- Debian Linux (aarch64), Python 3.10, NumPy 2.2.6
+
+NumPy-only (LLM harness: stdlib-only); no GPU or quantum hardware; the full negative-control run takes < 1 minute.
