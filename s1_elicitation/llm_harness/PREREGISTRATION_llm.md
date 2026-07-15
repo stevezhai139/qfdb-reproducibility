@@ -18,5 +18,10 @@
 ## Expected outcomes — all three informative, none predicted
 (a) S ≤ 2: classical-consistent judgment statistics; human-study prior stays at the Aerts–Sozzo default. (b) CI > 2 with NS failure: marginal-selectivity structure (the Dzhafarov-style outcome) — directly informative, since humans in the same one-judge-sees-both-settings design face the identical threat; sharpens the human protocol. (c) CI > 2 with NS pass: non-classical structure in the model's judgment statistics — a novel observation warranting its own write-up.
 
+## Amendment v1.1 (2026-07-15, after stage-1 interim look, BEFORE any stage-2 call — disclosed)
+Stage-1 (T=0.7, n=100/pair) gave prereg-S = −1.03 [−1.31, −0.72], parse 1.8%, NS delta 0.18. Two additions for stage 2, motivated by the interim look and locked now:
+1. **All four canonical CHSH combinations** (minus sign on each term in turn) are computed and reported; the pre-registered combination remains primary. A violation on any non-primary combination is claimed only if its 99% bootstrap CI clears 2 (Bonferroni-style tightening for 4 comparisons) *and* no-signaling passes.
+2. **No-signaling deltas reported per side×setting (all four) with bootstrap CIs**, not only the max; the 0.10 threshold applies to the maximum as before. Stage-1's observed delta (0.18) is treated as a hypothesis that the one-call-sees-both-settings design induces marginal selectivity in an LLM judge — stage 2 tests it with n=400/pair.
+
 ## Reporting commitments
 All stages and all temperatures reported, no pooling across prereg versions, raw JSONL logs kept in `runs/` and pushed to the repository, parse rates disclosed, model digest recorded. Results feed the journal/follow-on version and the human-study power analysis — not the CIDR submission (already under review).

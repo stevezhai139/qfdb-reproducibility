@@ -60,28 +60,43 @@ def chsh(counts):
         arr = np.array(obs, float)
         E[p] = float(np.mean(arr[:, 0] * arr[:, 1])) if len(arr) else 0.0
     S = E[("A", "B")] + E[("A", "B'")] + E[("A'", "B")] - E[("A'", "B'")]
-    # bootstrap CI over respondents within each pair
+    # prereg v1.1: all four canonical CHSH combinations (minus on each term in turn)
+    variant_signs = [
+        {("A","B"): 1, ("A","B'"): 1, ("A'","B"): 1, ("A'","B'"): -1},   # primary (prereg)
+        {("A","B"): 1, ("A","B'"): 1, ("A'","B"): -1, ("A'","B'"): 1},
+        {("A","B"): 1, ("A","B'"): -1, ("A'","B"): 1, ("A'","B'"): 1},
+        {("A","B"): -1, ("A","B'"): 1, ("A'","B"): 1, ("A'","B'"): 1},
+    ]
+    # bootstrap all variants on shared resamples (primary CI at 95%, variants at 99% per v1.1)
     rng = np.random.default_rng(42)
-    Ss = []
+    Ss = [[] for _ in variant_signs]
     for _ in range(5000):
-        s = 0.0
-        for p, sign in ((("A", "B"), 1), (("A", "B'"), 1), (("A'", "B"), 1), (("A'", "B'"), -1)):
+        Es = {}
+        for p in PAIRS:
             arr = np.array(counts[p], float)
             idx = rng.integers(0, len(arr), len(arr))
-            s += sign * float(np.mean(arr[idx, 0] * arr[idx, 1]))
-        Ss.append(s)
-    lo, hi = float(np.percentile(Ss, 2.5)), float(np.percentile(Ss, 97.5))
+            Es[p] = float(np.mean(arr[idx, 0] * arr[idx, 1]))
+        for vi, signs in enumerate(variant_signs):
+            Ss[vi].append(sum(signs[p] * Es[p] for p in PAIRS))
+    lo, hi = float(np.percentile(Ss[0], 2.5)), float(np.percentile(Ss[0], 97.5))
+    variants = []
+    for vi, signs in enumerate(variant_signs):
+        v = sum(signs[p] * E[p] for p in PAIRS)
+        v_lo, v_hi = float(np.percentile(Ss[vi], 0.5)), float(np.percentile(Ss[vi], 99.5))
+        variants.append({"S": round(v, 4), "ci99": [round(v_lo, 4), round(v_hi, 4)],
+                         "minus_on": [f"{p[0]},{p[1]}" for p, s in signs.items() if s == -1][0]})
     # no-signaling: side-1 marginal under a given setting must not depend on
     # the distant setting (and symmetrically)
-    ns = []
+    ns = {}
     for a_set in ("A", "A'"):
         m = [float(np.mean([o[0] for o in counts[(a_set, b)]])) for b in ("B", "B'")]
-        ns.append(abs(m[0] - m[1]))
+        ns[f"side1@{a_set} (B vs B')"] = round(abs(m[0] - m[1]), 4)
     for b_set in ("B", "B'"):
         m = [float(np.mean([o[1] for o in counts[(a, b_set)]])) for a in ("A", "A'")]
-        ns.append(abs(m[0] - m[1]))
+        ns[f"side2@{b_set} (A vs A')"] = round(abs(m[0] - m[1]), 4)
     return dict(E={f"{p[0]},{p[1]}": v for p, v in E.items()}, S=S, ci=[lo, hi],
-                max_nosignaling_delta=max(ns))
+                chsh_variants=variants,
+                nosignaling_deltas=ns, max_nosignaling_delta=max(ns.values()))
 
 # ---------- respondent backends ----------
 def call_llm(prompt, model, temperature, base_url, api_key, timeout=60):
@@ -183,7 +198,15 @@ def verdict(res):
         print("[verdict] CI above 2 but no-signaling FAILS -> signaling/contextual, "
               "the weaker reading; do not report as a Bell violation.")
     else:
-        print("[verdict] S consistent with the classical bound (<= 2).")
+        print("[verdict] primary (prereg) S consistent with the classical bound (<= 2).")
+    # prereg v1.1: non-primary variants need 99% CI clearance AND no-signaling pass
+    for v in res.get("chsh_variants", [])[1:]:
+        if v["ci99"][0] > 2 and ns < 0.10:
+            print(f"[verdict/v1.1] variant (minus on {v['minus_on']}): S={v['S']} "
+                  f"ci99={v['ci99']} clears 2 with NS pass -> report per amendment.")
+        elif abs(v["S"]) > 1.5:
+            print(f"[note] variant (minus on {v['minus_on']}): S={v['S']} "
+                  f"ci99={v['ci99']} -- exploratory, watch in stage 2.")
     # parse-rate guard (prereg: >10% at smoke test = fix before stage 1)
     bad = res.get("unparseable", 0)
     n_ok = res.get("n_coded")
