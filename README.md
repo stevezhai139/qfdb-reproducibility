@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21370700.svg)](https://doi.org/10.5281/zenodo.21370700)
+
 > **Reviewers:** [`QFDB_companion.pdf`](QFDB_companion.pdf) is the supplementary material for the CIDR 2027 submission -- full proofs, worked-example algebra, S1 power analysis, and the complete pre-registered negative-control methods and results.
 
 # QFDB — Reproducibility Repository
