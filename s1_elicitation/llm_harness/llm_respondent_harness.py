@@ -155,7 +155,8 @@ def run(args):
                 counts[pair].append(coded)
     res = chsh(counts)
     res.update(model=args.model, temperature=args.temperature,
-               n_per_pair=args.n_per_pair, unparseable=n_bad, log=log_path)
+               n_per_pair=args.n_per_pair, unparseable=n_bad,
+               n_coded=sum(len(v) for v in counts.values()), log=log_path)
     print(json.dumps(res, indent=1))
     verdict(res)
     return res
@@ -170,6 +171,7 @@ def analyse(paths):
                 counts[tuple(d["pair"])].append(d["coded"])
             meta = dict(model=d.get("model"), temperature=d.get("temperature"))
     res = chsh(counts); res.update(meta)
+    res["n_coded"] = sum(len(v) for v in counts.values())
     print(json.dumps(res, indent=1)); verdict(res)
 
 def verdict(res):
@@ -182,6 +184,23 @@ def verdict(res):
               "the weaker reading; do not report as a Bell violation.")
     else:
         print("[verdict] S consistent with the classical bound (<= 2).")
+    # parse-rate guard (prereg: >10% at smoke test = fix before stage 1)
+    bad = res.get("unparseable", 0)
+    n_ok = res.get("n_coded")
+    if n_ok:
+        rate = bad / max(1, bad + n_ok)
+        flag = "  << FIX PARSING BEFORE REAL RUN (prereg threshold 10%)" if rate > 0.10 else ""
+        print(f"[parse] unparseable = {bad}/{bad + n_ok} = {100*rate:.1f}%{flag}")
+    # human-study sample-size implication (prereg formula, alpha=.05 one-sided, power .8)
+    S = res["S"]; margin = S - 2.0
+    if margin > 0.05:
+        import math
+        n_pair = math.ceil((2 * 2.487 / margin) ** 2)
+        print(f"[human-n] if humans matched S={S:.2f}: ~{n_pair}/setting-pair "
+              f"(~{4*n_pair} respondents total)")
+    else:
+        print("[human-n] S <= 2: no violation-based estimate; human-study prior "
+              "stays at the Aerts-Sozzo default (S=2.42 -> ~124/pair, ~496 total)")
 
 def make_items_example():
     return ["cordless drill with lithium battery", "walnut coffee table",
