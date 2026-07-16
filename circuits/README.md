@@ -15,6 +15,21 @@ asserted; the script fails loudly on any mismatch.
 | C1 (2 qubits) | Inter-schema entanglement, §3 + S1: (\|cc⟩+\|ss⟩)/√2 | CHSH **S = 2.8284** (= 2√2); product control 1.414; entanglement entropy **1.000 bit** |
 | C2 (3 qubits) | Temporal shells + `AS OF` (Prop 3 + dynamics ¶) | coherence **0.500 → 0.000 → 0.500** with shells retained (fidelity 1.000000); destroy one shell → coherence 0.307 / fidelity 0.807 — **partially irreversible, matching the analytic formula ½·sin φ₁·\|a²−b²\| to 9 decimals** |
 | C3 (1 qubit) | Superposed schema, §3 example: √0.7\|chain⟩+√0.3\|star⟩ | Born statistics **0.70 / 0.30**; 10,000 sampled queries: 0.706/0.294 |
+| C4 (`c4_coherent_constraints.py`) | Coherent constraints (Prop B, theory note 08): `DECLARE CONSTRAINT x=y COHERENT` | product state ⇔ rectangle, **exhaustive 511/511** relations at 3×3; **Schmidt rank = incidence-matrix rank** on 400/400 random relations (entropies agree < 1e-9); a coherently-held injective key is **maximally entangled** (2.000 bits at d=4) |
+
+## What C4 adds: entanglement is a *relational* quantity
+Prop B (theory note 08): for a two-place predicate held as a uniform
+superposition over its satisfying set, (i) the state is separable **iff**
+the satisfying set is a combinatorial rectangle (the predicate decomposes as
+P₁(x)∧P₂(y)); (ii) **Schmidt rank = rank of the relation's 0/1 incidence
+matrix**; (iii) the entanglement spectrum = squared singular values of
+χ_S/√|S|. C4 proves (i) exhaustively at 3×3 and cross-validates (ii)+(iii)
+through two independently coded pipelines (state→partial trace→eigenvalues
+vs. matrix→rank/SVD). Consequences: the Bell pair of C1 *is* the constraint
+x=y held coherently (entropy 1 bit — same number); an injective functional
+dependency (a key) held coherently is maximally entangled; and
+"entanglement = constraint without extension" becomes a computable number
+you can read off the relation itself.
 
 ## What C2 demonstrates that NumPy cannot
 In the NumPy scripts nothing *prevents* keeping a hidden copy of the state —
